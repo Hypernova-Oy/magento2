@@ -40,13 +40,13 @@ class DepthCalculator
     /**
      * Add inline fragment fields into calculating of category depth
      *
-     * @param InlineFragmentNode $inlineFraggmentField
+     * @param InlineFragmentNode $inlineFragmentField
      * @param array $depth
      * @return int[]
      */
-    private function addInlineFragmentDepth(InlineFragmentNode $inlineFraggmentField, $depth = [])
+    private function addInlineFragmentDepth(InlineFragmentNode $inlineFragmentField, $depth = [])
     {
-        $selections = $inlineFraggmentField->selectionSet->selections;
+        $selections = $inlineFragmentField->selectionSet->selections;
         /** @var FieldNode $field */
         foreach ($selections as $field) {
             if ($field->kind === 'InlineFragment') {
