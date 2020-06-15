@@ -82,13 +82,13 @@ class AttributesJoiner
     /**
      * Add fields from inline fragment nodes
      *
-     * @param InlineFragmentNode $inlineFraggmentField
+     * @param InlineFragmentNode $inlineFragmentField
      * @param array $inlineFragmentFields
      * @return string[]
      */
-    private function addInlineFragmentFields(InlineFragmentNode $inlineFraggmentField, $inlineFragmentFields = [])
+    private function addInlineFragmentFields(InlineFragmentNode $inlineFragmentField, $inlineFragmentFields = [])
     {
-        $query = $inlineFraggmentField->selectionSet->selections;
+        $query = $inlineFragmentField->selectionSet->selections;
         /** @var FieldNode $field */
         foreach ($query as $field) {
             if ($field->kind === 'InlineFragment') {
