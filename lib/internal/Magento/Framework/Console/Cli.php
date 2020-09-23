@@ -224,11 +224,15 @@ class Cli extends Console\Application
         $commands = [];
         foreach (CommandLocator::getCommands() as $commandListClass) {
             if (class_exists($commandListClass)) {
-                $commands[] = $objectManager->create($commandListClass)->getCommands();
+                // phpcs:ignore Magento2.Performance.ForeachArrayMerge
+                $commands = array_merge(
+                    $commands,
+                    $objectManager->create($commandListClass)->getCommands()
+                );
             }
         }
 
-        return array_merge([], ...$commands);
+        return $commands;
     }
 
     /**
