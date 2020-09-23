@@ -42,9 +42,13 @@ class PublicCodeTest extends \PHPUnit\Framework\TestCase
             );
             $whiteListItems = [];
             foreach (glob($whiteListFiles) as $fileName) {
-                $whiteListItems[] = file($fileName, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                // phpcs:ignore Magento2.Performance.ForeachArrayMerge
+                $whiteListItems = array_merge(
+                    $whiteListItems,
+                    file($fileName, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES)
+                );
             }
-            $this->blockWhitelist = array_merge([], ...$whiteListItems);
+            $this->blockWhitelist = $whiteListItems;
         }
         return $this->blockWhitelist;
     }

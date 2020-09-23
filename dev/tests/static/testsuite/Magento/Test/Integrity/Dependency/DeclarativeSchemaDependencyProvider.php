@@ -85,11 +85,12 @@ class DeclarativeSchemaDependencyProvider
         foreach ($dependencies as $dependency) {
             $checkResult = array_intersect($declared, $dependency);
             if ($checkResult) {
-                $existingDeclared[] = array_values($checkResult);
+                //phpcs:ignore Magento2.Performance.ForeachArrayMerge
+                $existingDeclared = array_merge($existingDeclared, array_values($checkResult));
             }
         }
 
-        return array_unique(array_merge([], ...$existingDeclared));
+        return array_unique($existingDeclared);
     }
 
     /**
@@ -178,10 +179,13 @@ class DeclarativeSchemaDependencyProvider
         } else {
             foreach ($modules as $dependencySet) {
                 if (array_search($moduleName, $dependencySet) === false) {
-                    $resultDependencies[] = $dependencySet;
+                    //phpcs:ignore Magento2.Performance.ForeachArrayMerge
+                    $resultDependencies = array_merge(
+                        $resultDependencies,
+                        $dependencySet
+                    );
                 }
             }
-            $resultDependencies = array_merge([], ...$resultDependencies);
         }
 
         return array_values(array_unique($resultDependencies));

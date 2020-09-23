@@ -46,14 +46,14 @@ class RelationsCollector
      */
     private function getRelations(string $className): array
     {
-        $parents = $this->getRelationsReader()->getParents($className);
-        $result = [$parents];
+        $result = $this->getRelationsReader()->getParents($className);
 
-        foreach ($parents as $parent) {
-            $result[] = $this->getRelations($parent);
+        foreach ($result as $parent) {
+            // phpcs:ignore Magento2.Performance.ForeachArrayMerge
+            $result = array_merge($result, $this->getRelations($parent));
         }
 
-        return array_merge([], ...$result);
+        return $result;
     }
 
     /**
