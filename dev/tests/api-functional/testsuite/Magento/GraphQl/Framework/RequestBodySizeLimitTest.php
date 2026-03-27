@@ -62,7 +62,7 @@ QUERY;
   }
 }
 QUERY;
-        $depthError = false;
+        $sizeError = false;
         try {
             $response = $this->graphQlQuery($query);
             $this->assertArrayHasKey('storeConfig', $response);
@@ -72,8 +72,37 @@ QUERY;
                 $e->getMessage(),
                 'Normal-sized request should not trigger body size validation'
             );
-            $depthError = str_contains($e->getMessage(), 'too large');
+            $sizeError = str_contains($e->getMessage(), 'too large');
         }
-        $this->assertFalse($depthError, 'Normal-sized request must not be rejected by body size limit');
+        $this->assertFalse($sizeError, 'Normal-sized request must not be rejected by body size limit');
+    }
+
+    /**
+     * Verify that a JSON key amplification attack payload (many keys in variables)
+     * is rejected by the body size limit before json_decode can allocate memory.
+     */
+    public function testJsonKeyAmplificationAttackIsRejected(): void
+    {
+        $variables = ['filter' => []];
+        for ($i = 0; $i < 50000; $i++) {
+            $variables['filter']["a$i"] = ['eq' => "v$i"];
+        }
+
+        $this->expectException(ResponseContainsErrorsException::class);
+        $this->expectExceptionMessage(self::ERROR_MESSAGE);
+        $this->graphQlMutation('{ products { items { name } } }', $variables);
+    }
+
+    /**
+     * Verify that a large repeated-value variables payload is rejected.
+     */
+    public function testLargeRepeatedVariablesPayloadIsRejected(): void
+    {
+        $longValue = str_repeat('A', 524288);
+        $variables = ['a' => $longValue, 'b' => $longValue];
+
+        $this->expectException(ResponseContainsErrorsException::class);
+        $this->expectExceptionMessage(self::ERROR_MESSAGE);
+        $this->graphQlMutation('{ storeConfig { locale } }', $variables);
     }
 }
