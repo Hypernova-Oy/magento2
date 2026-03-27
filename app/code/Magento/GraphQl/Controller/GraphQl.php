@@ -127,6 +127,11 @@ class GraphQl implements FrontControllerInterface
     private $queryParser;
 
     /**
+     * @var int
+     */
+    private int $maxRequestBodySize;
+
+    /**
      * @param Response $response
      * @param SchemaGeneratorInterface $schemaGenerator
      * @param SerializerInterface $jsonSerializer
@@ -142,6 +147,7 @@ class GraphQl implements FrontControllerInterface
      * @param LoggerPool|null $loggerPool
      * @param AreaList|null $areaList
      * @param QueryParser|null $queryParser
+     * @param int $maxRequestBodySize Maximum allowed request body size in bytes (0 = no limit)
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -159,7 +165,8 @@ class GraphQl implements FrontControllerInterface
         ?LogData $logDataHelper = null,
         ?LoggerPool $loggerPool = null,
         ?AreaList $areaList = null,
-        ?QueryParser $queryParser = null
+        ?QueryParser $queryParser = null,
+        int $maxRequestBodySize = 1048576
     ) {
         $this->response = $response;
         $this->schemaGenerator = $schemaGenerator;
@@ -176,6 +183,7 @@ class GraphQl implements FrontControllerInterface
         $this->loggerPool = $loggerPool ?: ObjectManager::getInstance()->get(LoggerPool::class);
         $this->areaList = $areaList ?: ObjectManager::getInstance()->get(AreaList::class);
         $this->queryParser = $queryParser ?: ObjectManager::getInstance()->get(QueryParser::class);
+        $this->maxRequestBodySize = $maxRequestBodySize;
     }
 
     /**
@@ -291,6 +299,11 @@ class GraphQl implements FrontControllerInterface
         /** @var Http $request */
         if ($request->isPost() && $request->getContent()) {
             $content = $request->getContent();
+            if ($this->maxRequestBodySize > 0 && strlen($content) > $this->maxRequestBodySize) {
+                throw new GraphQlInputException(
+                    __('Request body is too large.')
+                );
+            }
             try {
                 $data = $this->jsonSerializer->unserialize($content);
             } catch (\InvalidArgumentException) {
